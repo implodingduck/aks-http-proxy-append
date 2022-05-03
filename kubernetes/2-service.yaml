@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: akshttpproxyappend
+spec:
+  selector:
+    app: akshttpproxyappend
+  ports:
+    - port: 443
+      targetPort: 8443

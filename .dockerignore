@@ -1,0 +1,6 @@
+.git
+.gitignore
+docker-stuff.sh
+Dockerfile
+kubernetes/**
+**/.gitkeep

@@ -1,0 +1,28 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: akshttpproxyappend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: akshttpproxyappend
+  template:
+    metadata:
+      labels:
+        app: akshttpproxyappend
+    spec:
+      containers:
+        - name: akshttpproxyappend
+          image: 
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8443
+          volumeMounts:
+            - name: cert
+              mountPath: /ssl
+              readOnly: true
+      volumes:
+        - name: cert
+          secret:
+            secretName: akshttpproxyappend-certs
