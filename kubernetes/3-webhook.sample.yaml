@@ -19,4 +19,4 @@ webhooks:
       apiGroups: [""]
       apiVersions: ["v1"]
       resources: ["pods"]
-  sideEffects: NoneOnDryRun
+  sideEffects: None

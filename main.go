@@ -48,6 +48,8 @@ func handleMutate(w http.ResponseWriter, r *http.Request) {
 	admissionReviewResponse.Response.UID = admissionReview.Request.UID
 
 	resp, err := json.Marshal(admissionReviewResponse)
+	klog.Info("the response:")
+	klog.Info(string(resp[:]))
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(resp)
 
