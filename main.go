@@ -1,18 +1,19 @@
 // based on:
 // https://github.com/trstringer/kubernetes-mutating-webhook/blob/main/cmd/root.go
 // https://github.com/alex-leonhardt/k8s-mutate-webhook
+// https://github.com/kubernetes/kubernetes/blob/release-1.21/test/images/agnhost/webhook/
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"html"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"time"
 
 	admission "k8s.io/api/admission/v1"
+	klog "k8s.io/klog/v2"
 )
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -20,20 +21,24 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMutate(w http.ResponseWriter, r *http.Request) {
-
+	klog.Info("lets try to mutate")
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+	klog.Info(string(body[:]))
 	if err != nil {
-		log.Println(err)
+		klog.Fatal(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "%s", err)
+		return
 	}
+	klog.Info("parsing admissionReview")
 	admissionReview := admission.AdmissionReview{}
 	if err := json.Unmarshal(body, &admissionReview); err != nil {
 		fmt.Fprintf(w, fmt.Sprintf("unmarshaling request failed with %s", err))
+		return
 	}
 	review, err := json.Marshal(admissionReview)
-	fmt.Fprintf(w, string(review[:]))
+	klog.Info(string(review[:]))
 	admissionResponse := &admission.AdmissionResponse{}
 	admissionResponse.Allowed = true
 
@@ -49,20 +54,27 @@ func handleMutate(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/", handleRoot)
-	mux.HandleFunc("/mutate", handleMutate)
-
-	s := &http.Server{
-		Addr:           ":8443",
-		Handler:        mux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20, // 1048576
+	certFile := "/ssl/cert.pem"
+	keyFile := "/ssl/cert.key"
+	port := 8443
+	klog.Info("server started")
+	sCert, serr := tls.LoadX509KeyPair(certFile, keyFile)
+	if serr != nil {
+		klog.Fatal(serr)
+	}
+	config := &tls.Config{
+		Certificates: []tls.Certificate{sCert},
 	}
 
-	log.Fatal(s.ListenAndServeTLS("/ssl/cert.pem", "/ssl/cert.key"))
+	http.HandleFunc("/", handleRoot)
+	http.HandleFunc("/mutate", handleMutate)
 
+	server := &http.Server{
+		Addr:      fmt.Sprintf(":%d", port),
+		TLSConfig: config,
+	}
+	err := server.ListenAndServeTLS("", "")
+	if err != nil {
+		panic(err)
+	}
 }

@@ -14,15 +14,15 @@ spec:
     spec:
       containers:
         - name: akshttpproxyappend
-          image: 
+          image: ghcr.io/implodingduck/aks-http-proxy-append:v0.0.1
           imagePullPolicy: Always
           ports:
             - containerPort: 8443
-          volumeMounts:
-            - name: cert
-              mountPath: /ssl
-              readOnly: true
-      volumes:
-        - name: cert
-          secret:
-            secretName: akshttpproxyappend-certs
+      #     volumeMounts:
+      #       - name: cert
+      #         mountPath: /ssl
+      #         readOnly: true
+      # volumes:
+      #   - name: cert
+      #     secret:
+      #       secretName: akshttpproxyappend-certs
