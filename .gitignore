@@ -30,3 +30,5 @@ override.tf.json
 
 **/*.pem
 **/*.key
+
+kubernetes/3-webhook.yaml

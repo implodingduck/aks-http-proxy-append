@@ -35,11 +35,14 @@ keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 [alt_names]
-DNS.1 = ${service}.${namespace}.svc.cluster.local
+DNS.1 = ${service}
+DNS.2 = ${service}.${namespace}
+DNS.3 = ${service}.${namespace}.svc
+DNS.4 = ${service}.${namespace}.svc.cluster.local
 EOF
 
 openssl genrsa -out "${tmpdir}"/server-key.pem 2048
-openssl req -new -key "${tmpdir}"/server-key.pem -subj "/CN=system:node:${service}.${namespace}.svc.cluster.local /OU="system:nodes" /O=system:nodes" -out "${tmpdir}"/server.csr -config "${tmpdir}"/csr.conf
+openssl req -new -key "${tmpdir}"/server-key.pem -subj "/CN=system:node:${service}.${namespace}.svc/OU=system:nodes/O=system:nodes" -out "${tmpdir}"/server.csr -config "${tmpdir}"/csr.conf
 
 echo "cleaning up old csr ${csrName}"
 # clean-up any previously created CSR for our service. Ignore errors if not present.
@@ -54,7 +57,7 @@ metadata:
   name: ${csrName}
 spec:
   groups:
-  - system:nodes
+  - system:authenticated
   request: $(< "${tmpdir}"/server.csr base64 | tr -d '\n')
   signerName: kubernetes.io/kubelet-serving
   usages:
