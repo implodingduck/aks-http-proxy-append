@@ -20,3 +20,4 @@ webhooks:
       apiVersions: ["v1"]
       resources: ["pods"]
   sideEffects: None
+  failurePolicy: Ignore
