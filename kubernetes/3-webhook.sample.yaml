@@ -6,7 +6,7 @@ metadata:
     app: akshttpproxyappend
 webhooks:
 - admissionReviewVersions: ["v1"]
-  name: akshttpproxyappend.default.svc.cluster.local
+  name: akshttpproxyappend.azmk8s.io
   clientConfig:
     caBundle: ${kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}'}
     service:
